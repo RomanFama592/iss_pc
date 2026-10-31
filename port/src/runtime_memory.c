@@ -52,7 +52,11 @@ static uint64_t pool_size_bytes(void) {
  * Layout idea from Liondarkz/issn_pc (runtime_memory.c, GPL-2.0), core by axylpup. */
 #define GUEST_LOW_MIN UINT64_C(0x200000000)
 #define GUEST_LOW_MAX UINT64_C(0x0800000000)
+#ifdef TLG_GPU_V3
+/* Only renderer v3 reads it: elsewhere guest_low() is 0, and a global that is only written
+ * stops the build (-Werror=unused-but-set-global, clang 21 of MSYS2 CLANG64). */
 static int guest_low_enabled = -1;
+#endif
 static int guest_low(void) {
 #ifdef TLG_GPU_V3
     if (guest_low_enabled<0) {
@@ -204,7 +208,9 @@ void runtime_memory_reserve(void) {
         } else {
             fprintf(stderr,"Runtime: 0x%" PRIx64 "-0x%" PRIx64 " is in use (error %lu): guest memory starts at 0x%" PRIx64 "\n",
                     (uint64_t)GUEST_LOW_MIN,(uint64_t)GUEST_LOW_MAX,GetLastError(),(uint64_t)USER_MIN);
+#ifdef TLG_GPU_V3
             guest_low_enabled=0;
+#endif
         }
     }
     if (!guest_low()) {
