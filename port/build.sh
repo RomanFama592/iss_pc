@@ -50,6 +50,21 @@ MINGW*|MSYS*)
         cp out/gpu_v2/tlg-probe-v2.exe out/
         echo "Built $PWD/out/tlg-probe-v2.exe (renderer v2)"
     fi
+    # TLG_RENDERER_V3=1: renderer v3 (docs/RENDERER_V3_AXYLPUP.md), its own loader in
+    # out/tlg-probe-v3.exe. Experimental: a failed build does not stop the package; its log is
+    # kept as out/gpu_v3-build.log (shipped too, so it can be read on the player's PC).
+    if [[ ${TLG_RENDERER_V3:-${ISS_RENDERER_V3:-}} == 1 ]]; then
+        rm -f out/tlg-probe-v3.exe
+        if cmake -S gpu_v3 -B out/gpu_v3 -G Ninja -DCMAKE_BUILD_TYPE=Release -DTLG_LTO=OFF \
+                -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ > out/gpu_v3-build.log 2>&1 &&
+           ninja -C out/gpu_v3 tlg-probe >> out/gpu_v3-build.log 2>&1; then
+            cp out/gpu_v3/tlg-probe.exe out/tlg-probe-v3.exe
+            echo "Built $PWD/out/tlg-probe-v3.exe (renderer v3)"
+        else
+            grep -v '^\[' out/gpu_v3-build.log | tail -60 >&2
+            echo 'Renderer v3 build failed (log: out/gpu_v3-build.log); packaging without it' >&2
+        fi
+    fi
     exit 0
     ;;
 esac

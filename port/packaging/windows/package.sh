@@ -56,6 +56,11 @@ if [[ -f out/tlg-probe-v2.exe ]]; then
     mkdir -p "$dest/gpu_v2"
     cp gpu_v2/defaults.env gpu_v2/README.md "$dest/gpu_v2/"
 fi
+# Renderer v3 (TLG_RENDERER_V3=1 build.sh, experimental): its probe, and its build log either way.
+if [[ -f out/tlg-probe-v3.exe ]]; then
+    llvm-strip --strip-debug -o "$dest/out/tlg-probe-v3.exe" out/tlg-probe-v3.exe
+fi
+[[ -f out/gpu_v3-build.log ]] && cp out/gpu_v3-build.log "$dest/out/"
 # Every DLL the executables load from the CLANG64 tree (SDL3, FFmpeg, Vulkan loader, ...), found by
 # walking the import tables against /clang64/bin itself. ldd resolved them through PATH, where the
 # runner's Strawberry Perl has its own libiconv-2.dll: that one was filtered out as "not CLANG64"
@@ -64,6 +69,7 @@ fi
 declare -A shipped=()
 queue=("$dest/out/tlg-probe.exe" "$dest/out/tlg-gpu-capabilities.exe")
 [[ -f "$dest/out/tlg-probe-v2.exe" ]] && queue+=("$dest/out/tlg-probe-v2.exe")
+[[ -f "$dest/out/tlg-probe-v3.exe" ]] && queue+=("$dest/out/tlg-probe-v3.exe")
 while ((${#queue[@]})); do
     binary=${queue[0]}
     queue=("${queue[@]:1}")
