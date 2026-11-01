@@ -60,6 +60,9 @@ fi
 # as .txt (check_package.sh rightly refuses every *.log, the players' logs among them).
 if [[ -f out/tlg-probe-v3.exe ]]; then
     llvm-strip --strip-debug -o "$dest/out/tlg-probe-v3.exe" out/tlg-probe-v3.exe
+    # Its release switches (axylpup's defaults; the launcher does not read them yet).
+    mkdir -p "$dest/gpu_v3"
+    cp gpu_v3/release_flags.env "$dest/gpu_v3/"
 fi
 [[ -f out/gpu_v3-build.log ]] && cp out/gpu_v3-build.log "$dest/out/gpu_v3-build.txt"
 # Every DLL the executables load from the CLANG64 tree (SDL3, FFmpeg, Vulkan loader, ...), found by
