@@ -52,7 +52,7 @@ MINGW*|MSYS*)
     fi
     # TLG_RENDERER_V3=1: renderer v3 (docs/RENDERER_V3_AXYLPUP.md), its own loader in
     # out/tlg-probe-v3.exe. Experimental: a failed build does not stop the package; its log is
-    # kept as out/gpu_v3-build.log (shipped too, so it can be read on the player's PC).
+    # kept as out/gpu_v3-build.log (shipped as gpu_v3-build.txt, to be read on the player's PC).
     if [[ ${TLG_RENDERER_V3:-${ISS_RENDERER_V3:-}} == 1 ]]; then
         rm -f out/tlg-probe-v3.exe
         if cmake -S gpu_v3 -B out/gpu_v3 -G Ninja -DCMAKE_BUILD_TYPE=Release -DTLG_LTO=OFF \
