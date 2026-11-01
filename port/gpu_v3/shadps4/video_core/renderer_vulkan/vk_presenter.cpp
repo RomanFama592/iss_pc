@@ -684,6 +684,11 @@ bool Presenter::IsVideoOutSurface(const AmdGpu::ColorBuffer& color_buffer) const
 }
 
 void Presenter::RecreateFrame(Frame* frame, u32 width, u32 height) {
+    // iss: a minimized or zero-sized window asks for a 0x0 frame, which Vulkan cannot create
+    // (VMA returned VK_ERROR_INITIALIZATION_FAILED and the game stopped at UNREACHABLE). Keep at
+    // least one texel; restoring the window changes the size again and recreates the frame.
+    width = std::max(width, 1u);
+    height = std::max(height, 1u);
     const vk::Device device = instance.GetDevice();
     if (frame->image_view) {
         device.destroyImageView(frame->image_view);
@@ -1426,9 +1431,13 @@ Frame* Presenter::GetRenderFrame() {
     }
     Common::FaultMonitor::CountRenderFrame(queue_ns, Common::FaultMonitor::SinceNs(fence_start));
 
-    if (frame->width != expected_frame_width || frame->height != expected_frame_height ||
+    // iss: the same at-least-one-texel size RecreateFrame uses, so a minimized window does not
+    // recreate the frame every time.
+    const u32 want_width = std::max(expected_frame_width, 1u);
+    const u32 want_height = std::max(expected_frame_height, 1u);
+    if (frame->width != want_width || frame->height != want_height ||
         frame->is_hdr != swapchain.GetHDR()) {
-        RecreateFrame(frame, expected_frame_width, expected_frame_height);
+        RecreateFrame(frame, want_width, want_height);
     }
 
     return frame;
